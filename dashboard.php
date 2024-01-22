@@ -1,4 +1,5 @@
 <?php
+#Git Branch - featureDashboard
 include 'config.php';
 include 'logout.php';
 $validateUserID = $_SESSION['userid'];

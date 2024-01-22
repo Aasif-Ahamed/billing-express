@@ -11,17 +11,19 @@
     }
 
     .custombackground {
-        background: #fe8c00;
-        background: -webkit-linear-gradient(to right, #fe8c00, #f83600);
-        background: linear-gradient(to right, #fe8c00, #f83600);
+        background: #003366;
+        background: -webkit-linear-gradient(to right, #003366, #0055a5);
+        background: linear-gradient(to right, #003366, #0055a5);
+
         color: white;
         font-weight: bolder;
     }
 
     .custombackground2 {
-        background: #007991;
-        background: -webkit-linear-gradient(to right, #007991, #78ffd6);
-        background: linear-gradient(to right, #007991, #78ffd6);
+        background: #333333;
+        background: -webkit-linear-gradient(to right, #333333, #4f6d7a);
+        background: linear-gradient(to right, #333333, #4f6d7a);
+
         color: white;
         font-weight: bolder;
     }

@@ -1,6 +1,8 @@
 <?php
 ob_start();
 include 'config.php';
+include 'logout.php';
+$actionID = $_SESSION['userid'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,11 +22,22 @@ include 'config.php';
         $btnUpdateStock = $_POST['btnUpdateStock'];
         $pname = $_POST['pname'];
         $pquantity = $_POST['pquantity'];
+        $sprice = $_POST['sprice'];
         $pprice = $_POST['pprice'];
-
-        $updateStockRec = "UPDATE `stockinv` SET `name`='$pname', `quantity`='$pquantity', `price`='$pprice' WHERE `id`='$btnUpdateStock'";
+        $netprofit = '';
+        if ($sprice == '' || $sprice == null || $pprice == '' || $pprice == null) {
+            $sprice = '0';
+            $pprice = '0';
+            $netprofit = '0';
+        } else {
+            $netprofit = $sprice - $pprice;
+        }
+        $updateStockRec = "UPDATE `stockinv` SET `name`='$pname', `quantity`='$pquantity', `price`='$sprice', `purchasePrice`='$pprice', `netprofit`='$netprofit' WHERE `id`='$btnUpdateStock'";
 
         if ($connection->query($updateStockRec) === TRUE) {
+            $logDescUtStk = 'User id ' . $_SESSION['userid'] . ' has updated a stock detail';
+            $logQueryUtStk = "INSERT INTO `sitelogs` (`siteAction`,`description`,`userId`) VALUES ('UPDATE / STOCK','$logDescUtStk','$actionID')";
+            $connection->query($logQueryUtStk);
             sleep(3);
             header("Location:stocks.php");
         } else {
@@ -83,10 +96,16 @@ include 'config.php';
                                     <label for="floatingInputQuantity">Quantity</label>
                                 </div>
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <div class="form-floating mb-3">
-                                    <input type="number" name="pprice" class="form-control" id="floatingInputPrice" placeholder="Price" value="<?php echo $fetchRecRow['price']; ?>">
-                                    <label for="floatingInputPrice">Price</label>
+                                    <input type="number" name="pprice" class="form-control" id="floatingInputPurchasePrice" placeholder="Purchase Price" value="<?php echo $fetchRecRow['purchasePrice']; ?>">
+                                    <label for="floatingInputPurchasePrice">Purchase Price</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="number" name="sprice" class="form-control" id="floatingInputSellingPrice" placeholder="Selling Price" value="<?php echo $fetchRecRow['price']; ?>">
+                                    <label for="floatingInputSellingPrice">Selling Price</label>
                                 </div>
                             </div>
                             <div class="col-md-6">

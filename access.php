@@ -104,6 +104,17 @@ if ($fetchtoValres->num_rows > 0) {
                     </div>
                 </div>
             </div>
+            <div class="col-md-4">
+                <div class="card mb-2">
+                    <div class="card-header">
+                        Activity Log
+                    </div>
+                    <div class="card-body">
+
+                        <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#exampleModalLogs"><i class="fa-solid fa-chart-line"></i> View</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <table class="table table-striped table-responsive table-sm" id="accessTbl">
@@ -277,6 +288,56 @@ if ($fetchtoValres->num_rows > 0) {
                 </div>
             </div>
         </div>
+
+        <div class="modal fade modal-xl" id="exampleModalLogs" tabindex="-1" aria-labelledby="exampleModalLogsLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLogsLabel">Site Activity Logs</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-striped table-responsive table-sm" id="logTbl">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Action</th>
+                                    <th>Description</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $i = 1;
+                                $fetchLogs = "SELECT users.*, sitelogs.* FROM users INNER JOIN sitelogs ON users.id = sitelogs.userId ORDER BY sitelogs.createtime DESC;";
+                                $fetchLogsres = $connection->query($fetchLogs);
+                                if ($fetchLogsres->num_rows > 0) {
+                                    while ($logRow = $fetchLogsres->fetch_assoc()) {
+                                ?>
+                                        <tr>
+                                            <td>
+                                                <?php echo $i++; ?>
+                                            </td>
+                                            <td><?php echo $logRow['name']; ?></td>
+                                            <td><?php echo $logRow['siteAction']; ?></td>
+                                            <td><?php echo $logRow['description']; ?></td>
+                                            <td><?php echo $logRow['createtime']; ?></td>
+                                        </tr>
+                                <?php
+                                    }
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <?php include 'btrpjs.php'; ?>
 </body>
@@ -285,5 +346,8 @@ if ($fetchtoValres->num_rows > 0) {
 <script>
     $(document).ready(function() {
         $('#accessTbl').DataTable();
+    });
+    $(document).ready(function() {
+        $('#logTbl').DataTable();
     });
 </script>

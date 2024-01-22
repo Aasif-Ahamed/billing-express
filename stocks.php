@@ -29,11 +29,20 @@ if ($fetchtoValres->num_rows > 0) {
     if (isset($_POST['btnAddProd'])) {
         $pname = $_POST['pname'];
         $pquantity = $_POST['pquantity'];
+        $sprice = $_POST['sprice'];
         $pprice = $_POST['pprice'];
+        $netprofit = '';
+        if ($sprice == '' || $sprice == null || $pprice == '' || $pprice == null) {
+            $sprice = '0';
+            $pprice = '0';
+            $netprofit = '0';
+        } else {
+            $netprofit = $sprice - $pprice;
+        }
         try {
             $conn = new PDO(sprintf('mysql:host=%s; dbname=%s', $host, $dbname), $username, $password);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $addProds = "INSERT INTO `stockinv` (`name`,`quantity`,`price`) VALUES ('$pname','$pquantity','$pprice')";
+            $addProds = "INSERT INTO `stockinv` (`name`,`quantity`,`price`,`purchasePrice`,`netprofit`) VALUES ('$pname','$pquantity','$sprice','$pprice','$netprofit')";
 
             if ($conn->exec($addProds) === 1) {
     ?>
@@ -106,13 +115,15 @@ if ($fetchtoValres->num_rows > 0) {
                     <th>#</th>
                     <th>Name</th>
                     <th>Quantity</th>
-                    <th>Price</th>
+                    <th>P. Price</th>
+                    <th>S. Price</th>
+                    <th>N. Profit</th>
                 </tr>
             </thead>
             <tbody>
                 <?php
 
-                $fetchProducts = "SELECT * FROM `stockinv`";
+                $fetchProducts = "SELECT * FROM `stockinv` ORDER BY `createtime` DESC";
                 $fetchProductsres = $connection->query($fetchProducts);
                 if ($fetchProductsres->num_rows > 0) {
                     while ($productRow = $fetchProductsres->fetch_assoc()) {
@@ -126,7 +137,9 @@ if ($fetchtoValres->num_rows > 0) {
                             </td>
                             <td><?php echo $productRow['name']; ?></td>
                             <td><?php echo number_format($productRow['quantity']); ?></td>
+                            <td><?php echo 'Rs. ' . number_format($productRow['purchasePrice'], 2); ?></td>
                             <td><?php echo 'Rs. ' . number_format($productRow['price'], 2); ?></td>
+                            <td><?php echo 'Rs. ' . number_format($productRow['netprofit'], 2); ?></td>
                         </tr>
                 <?php
                     }
@@ -157,10 +170,16 @@ if ($fetchtoValres->num_rows > 0) {
                                         <label for="floatingInputQuantity">Quantity</label>
                                     </div>
                                 </div>
-                                <div class="col-md-12">
+                                <div class="col-md-6">
                                     <div class="form-floating mb-3">
-                                        <input type="number" name="pprice" class="form-control" id="floatingInputPrice" placeholder="Price">
-                                        <label for="floatingInputPrice">Price</label>
+                                        <input type="number" name="pprice" class="form-control" id="floatingInputPurchPrice" placeholder="Purchase Price">
+                                        <label for="floatingInputPurchPrice">Purchase Price</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <input type="number" name="sprice" class="form-control" id="floatingInputPrice" placeholder="Selling Price">
+                                        <label for="floatingInputPrice">Selling Price</label>
                                     </div>
                                 </div>
                             </div>

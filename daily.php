@@ -39,7 +39,9 @@ if ($fetchtoValres->num_rows > 0) {
         $price = $_POST['price'];
         $nettotal = $_POST['nettotal'];
         $totalPay = $_POST['totalPay'];
-        if (count($productID) == count($names) && count($productID) == count($quantities) && count($productID) == count($astk) && count($productID) == count($price)) {
+        $purchPrice = $_POST['purchPrice'];
+
+        if (count($productID) == count($names) && count($productID) == count($quantities) && count($productID) == count($astk) && count($productID) == count($price) && count($productID) == count($purchPrice)) {
             $totalItems = count($productID);
 
             $initialQuery = "INSERT INTO `invoices` (`invNo`,`cxName`,`totalPay`) VALUES ('$invNo','$cxName','$totalPay')";
@@ -50,9 +52,13 @@ if ($fetchtoValres->num_rows > 0) {
                     $newQuant = mysqli_escape_string($connection, $quantities[$i]);
                     $astk2 = mysqli_escape_string($connection, $astk[$i]);
                     $pricenew = mysqli_escape_string($connection, $price[$i]);
+                    $purchPricenew = mysqli_escape_string($connection, $purchPrice[$i]);
                     $deductquant = "UPDATE `stockinv` SET `quantity`= $astk2 - $newQuant WHERE `id`='$newPID'";
                     $deductres = $connection->query($deductquant);
-                    $secondaryQuery = "INSERT INTO `invdetails` (`invNo`,`pid`,`pName`,`quantity`,`purcPrice`) VALUES ('$invNo','$newPID','$newNames','$newQuant',$pricenew)";
+
+                    $netprofit = ($pricenew - $purchPricenew) * $newQuant;
+
+                    $secondaryQuery = "INSERT INTO `invdetails` (`invNo`,`pid`,`pName`,`quantity`,`purcPrice`,`shopPurchasePrice`) VALUES ('$invNo','$newPID','$newNames','$newQuant',$pricenew, $netprofit)";
                     $results = $connection->query($secondaryQuery);
                 }
                 if ($deductres == 1) {
@@ -115,6 +121,7 @@ if ($fetchtoValres->num_rows > 0) {
                                 </div>
                                 <input type="hidden" name="productID[]" id="productID" class="productID">
                                 <input type="hidden" name="availStock[]" id="availStock" class="availStock">
+                                <input type="hidden" name="purchPrice[]" id="pruchasingPrice" class="pruchasingPrice">
                                 <input type="hidden" name="nettotal[]" class="form-control totalPrice" id="totalPrice" placeholder="Net Total" readonly>
                             </td>
 
@@ -162,6 +169,7 @@ if ($fetchtoValres->num_rows > 0) {
                 ?>
         </datalist>
     </div>
+
     <?php require 'btrpjs.php'; ?>
 </body>
 
@@ -175,8 +183,7 @@ if ($fetchtoValres->num_rows > 0) {
             $('#dynamic_field').append('<tr id="row' + i + '">' +
                 '<td><div class="form-floating mb-3"><input type="text" class="form-control productName" name="name[]" list="datalistOptions" placeholder="Search Product"><label for="productName">Search Product</label></div></td>' +
                 '<td><div class="form-floating mb-3"><input type="number" name="quantity[]"  class="form-control productQuantity" placeholder="Quantity"><label for="productQuantity">Quantity</label></div></td>' +
-                '<td><div class="form-floating mb-3"><input type="text" name="price[]" class="form-control productPrice" readonly placeholder="Price"><label for="productPrice">Price</label></div><input type="hidden" name="productID[]" id="productID" class="productID"><input type="hidden" name="availStock[]" id="availStock" class="availStock"></td>' +
-                '<td><div class="form-floating mb-3"><input type="text" name="nettotal[]" class="form-control totalPrice" readonly placeholder="Net Total"><label for="totalPrice">Net Total</label></div></td>' +
+                '<td><div class="form-floating mb-3"><input type="text" name="price[]" class="form-control productPrice" readonly placeholder="Price"><label for="productPrice">Price</label></div><input type="hidden" name="productID[]" id="productID" class="productID"><input type="hidden" name="availStock[]" id="availStock" class="availStock"><input type="hidden" name="purchPrice[]" id="pruchasingPrice" class="pruchasingPrice">                                <input type="hidden" name="nettotal[]" class="form-control totalPrice" id="totalPrice" placeholder="Net Total" readonly></td>' +
                 '<td class="text-center"><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove"><i class="fa-solid fa-rectangle-xmark"></i></button></td>' +
                 '</tr>');
         });
@@ -218,12 +225,14 @@ if ($fetchtoValres->num_rows > 0) {
                         var productPrice = parseFloat(data.product_price);
                         var fpid = data.pid;
                         var actualStock = data.actlStk;
+                        var acpnew = data.acp;
 
                         if (!isNaN(productPrice)) {
                             // Update the product price input field in the current row
                             currentRow.find('.productPrice').val(productPrice);
                             currentRow.find('.productID').val(fpid)
                             currentRow.find('.availStock').val(actualStock);
+                            currentRow.find('.pruchasingPrice').val(acpnew);
                         } else {
                             console.error('Invalid product price:', data.product_price);
                         }

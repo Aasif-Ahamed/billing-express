@@ -115,6 +115,10 @@ require 'vendor/autoload.php';
         $dompdf->render();
         ob_end_clean();
         $dompdf->stream('Invoice_' . generateRandomString() . '.pdf', array('Attachment' => 0));
+
+        $logDescInv = "User Id " . $validateUserID . " has generated an Invoice [" . $generateInv . "]";
+        $logDescInvQur = "INSERT INTO `sitelogs` (`siteAction`,`description`,`userId`) VALUES ('GENERATE / INVOICE','$logDescInv','$validateUserID')";
+        $connection->query($logDescInvQur);
     }
     ?>
     <div class="container">
